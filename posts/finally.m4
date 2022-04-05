@@ -24,11 +24,6 @@
      &nbsp;
     <a href="../resume.pdf">Resume</a>
     <hr>
-    <h1 id="blog-up">Blog Up</h1>
-<h2 id="site-structure">Site Structure</h2>
-<p>For this site I’ve written my own genuinely terrible blog generator.
-It uses a combination of Makfiles and <code>m4</code>. This post is
-mostly a test to make sure everything works.</p>
-
+    include(finally_content.html)
   </body>
 </html>
