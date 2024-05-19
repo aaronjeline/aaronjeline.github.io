@@ -1,0 +1,722 @@
+<!doctype html>
+<html>
+    <meta charset="UTF-8" />
+    <head>
+        <link rel="stylesheet" href="/style.css?ver=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+    rel="stylesheet"
+<link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400;1,700&family=Lobster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400;1,700&family=Lobster&family=Roboto:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+
+<script>hljs.highlightAll();</script>
+
+        <meta name="author" content="Aaron Eline" />
+        <meta name="dcterms.date" content="May 19, 2024" />
+        <title>Verifying A
+Wacky Sparse Set Implementation (Part 1)</title>
+    </head>
+    <body>
+        <header>
+    <a href="/index.html">Aaron Eline</a>
+    <nav>
+        <a href="/posts.html">Posts</a>
+    </nav>
+</header>
+
+        <main>
+            <h1>Verifying A
+Wacky Sparse Set Implementation (Part 1)</h1>
+            <div class="metadata">
+                <p class="author">Aaron Eline</p>
+                <p class="metadata-sep">•</p
+                <p class="date">May 19, 2024</p>
+            </div>
+            <article><p>
+ One of my favorite blog posts is Russ Cox’s
+ <a href="https://research.swtch.com/sparse">
+  Using Uninitialized Memory for
+Fun and Profit
+ </a>
+ , which describes a very clever sparse set
+implementation that that involves reading from uninitialized memory. I
+thought it would be fun to try and build a formally verified
+implementation of this data-structure in Dafny. If you’re already
+familiar with Dafny and formal verification, skip to
+ <a href="lol">
+  Part
+2
+ </a>
+</p>
+<h2 id="what-is-dafny">
+ What is Dafny?
+</h2>
+<p>
+ <a href="https://dafny.org">
+  Dafny
+ </a>
+ is a “verification-aware
+programming language” that uses automated reasoning to prove program
+invariants at compile time. This lets you ensure things about all
+possible executions of your programs, instead of just testing various
+cases. As a simple example, let’s write an absolute value function:
+</p>
+<pre class="dafny"><code>method abs(x : int) returns (r : int) {
+   r := x;
+}</code></pre>
+<p>
+ This denotes a
+ <code>
+  method
+ </code>
+ named
+ <code>
+  abs
+ </code>
+ that takes
+single an integer as a parameter, and returns an integer named
+ <code>
+  r
+ </code>
+ . Most language don’t’ have you named your return values,
+but we’ll see why dafny does in a minute. It’s hard to write code
+without bugs (keen eyed readers may have spotted one!): so let’s try to
+verify that the method is correct:
+</p>
+<pre class="dafny"><code>method abs(x : int) returns (r : int)
+ensures r &gt;= 0
+{
+        r := x;
+}</code></pre>
+<p>
+ We’ve added an
+ <code>
+  ensures
+ </code>
+ clause to the method signature,
+saying that after this method returns,
+ <code>
+  r
+ </code>
+ must be greater
+than or equal to
+ <code>
+  0
+ </code>
+ . (This is why we need to name the return
+value, if we don’t name it we can’t talk about it)
+ <code>
+  ensures
+ </code>
+ clauses form a methods “Contract”, the set of rules it guarantees to
+uphold for all possible inputs. This method will now fail to compile,
+because we clearly don’t uphold the contract. If we adjust the body to
+say:
+</p>
+<pre><code>{
+  if x &lt; 0 {
+    r := -x;
+  } else {
+    r := x;
+  }
+}</code></pre>
+<p>
+ Now it’ll compile. Dafny knows that in the true-branch,
+ <code>
+  x
+ </code>
+ will be less than zero, so
+ <code>
+  -x
+ </code>
+ will be
+greater than zero, so indeed
+ <code>
+  r
+ </code>
+ will be greater than or
+equal to zero. Likewise, in the false-branch:
+ <code>
+  x
+ </code>
+ must be
+greater than or equal to zero, so assigning to
+ <code>
+  r
+ </code>
+ will make
+ <code>
+  r
+ </code>
+ greater than or equal to zero. Dafny figures this using
+an automated reasoning technique called a
+ <a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">
+  SMT
+Solver
+ </a>
+ . There’s an important lesson to point out here:
+ <em>
+  verification is only as good as your specification
+ </em>
+ .
+</p>
+<pre class="dafny"><code>method abs(x : int) returns (r : int)
+ensures r &gt;= 0
+{
+  r := 5;
+}</code></pre>
+<p>
+ This will also compile, and clearly does meet the specification, but
+also clearly does not implement an absolute value function!
+</p>
+<p>
+ There’s another way we could have gotten the method to compile, which
+is to add a
+ <code>
+  requires
+ </code>
+ clause:
+</p>
+<pre><code>method abs(x : int) returns (r : int)
+requires x &gt;= 0
+ensures r &gt;= 0
+{
+  r := x;
+}</code></pre>
+<p>
+ This compiles, and will result in dafny ensuring that at every call
+to
+ <code>
+  abs
+ </code>
+ , it’s impossible for
+ <code>
+  x
+ </code>
+ to be less than
+ <code>
+  0
+ </code>
+ . Since
+ <code>
+  x
+ </code>
+ must be greater than or equal to
+zero, and all we do is assign
+ <code>
+  r
+ </code>
+ to
+ <code>
+  x
+ </code>
+ , then
+clearly the
+ <code>
+  ensures
+ </code>
+ 1 clause also holds. Obviously this
+makes
+ <code>
+  abs
+ </code>
+ pretty useless, but demonstrates both sides of
+the Contract mechanism. Dafny attempts to have most of the features
+you’d expect from a modern language, including objects, first-class
+functions, and algebraic types. We’ll try to use to ensure we implement
+the data structure Cox describes correctly.
+</p>
+<h2 id="round-one-a-simple-set-data-structure">
+ Round One: a simple set
+data structure
+</h2>
+<p>
+ Before trying to prove anything the cool safety-violating structure,
+let’s write probably the simplest possible set data structure: one
+backed by a flat array containing all of the members.
+</p>
+<pre class="dafny"><code>class ArraySet {
+}</code></pre>
+<p>
+ Our set will be represented as an object, with two fields:
+</p>
+<pre class="dafny"><code>var arr : array&lt;boo&gt;</code></pre>
+<p>
+ <code>
+  arr
+ </code>
+ will track which integers are part of the set:
+ <code>
+  arr[i]
+ </code>
+ being
+ <code>
+  true
+ </code>
+ will means
+ <code>
+  i
+ </code>
+ is
+a member of these set.
+</p>
+<pre class="dafny"><code>ghost var spec : set&lt;nat&gt;</code></pre>
+<p>
+ <code>
+  ghost
+ </code>
+ vars are a neat feature of dafny. They instruct
+the compiler that a variable/function should
+ <em>
+  not
+ </em>
+ be including
+the compiled program, but instead should only be used for compile-team
+reasoning. In this case, we’re using the a ghost var that corresponds to
+Dafny’s built-in mathematical notion of Sets.
+</p>
+<h3 id="validity-predicate">
+ Validity Predicate
+</h3>
+<p>
+ Now we’ll define our first method. This method will be in charge of
+ensuring that the actual data structure (
+ <code>
+  arr
+ </code>
+ ) corresponds
+with the mathematical set (the
+ <code>
+  ghost
+ </code>
+ set):
+</p>
+<pre class="dafny"><code>ghost function valid() : bool
+{
+   ...
+}</code></pre>
+<p>
+ This is a
+ <code>
+  ghost function
+ </code>
+ :
+ <code>
+  ghost
+ </code>
+ again
+meaning “don’t actually compile this, just use it for compile-time
+proving” and
+ <code>
+  function
+ </code>
+ meaning that the block of code has no
+side effects and always terminates. In order to use code in a proof, it
+must be a
+ <code>
+  function
+ </code>
+ .
+</p>
+<p>
+ So how do we actually check that the two structures correspond:
+</p>
+<pre><code>{
+  (set x : int | 0 &lt;= x &lt; this.arr.Length &amp;&amp; this.arr[x] == true) == this.spec
+}</code></pre>
+<p>
+ This is a “set comprehension” (similar to list comprehensions, but
+you know, for sets). It instructs Dafny to create a set containing every
+integer for which the expression after
+ <code>
+  |
+ </code>
+ evaluates to
+ <code>
+  true
+ </code>
+ . In this case that’s every integer that’s in bound of
+the array, and for which that position of the array is set to
+ <code>
+  true
+ </code>
+ , exactly the interpretation we specified above. Then
+we check that our constructed set is equal to our
+ <code>
+  spec
+ </code>
+ variable. If it is: we’re valid!
+</p>
+<h3 id="constructor">
+ Constructor
+</h3>
+<p>
+ Here’s the specification for the constructor:
+</p>
+<pre class="dafny"><code>constructor(size : nat)
+ensures valid()
+ensures spec == {}</code></pre>
+<p>
+ This means that when the constructor is finished, two things must be
+true: 1.
+ <code>
+  valid()
+ </code>
+ must evaluate to
+ <code>
+  true
+ </code>
+ 2.
+ <code>
+  spec
+ </code>
+ must be equal to the empty set
+</p>
+<p>
+ Taken together: that means that the data structure must represent the
+empty set. This should be trivial, we just need to construct a big array
+of
+ <code>
+  false
+ </code>
+ .
+</p>
+<pre class="dafny"><code>{
+  spec := {}; // Make spec the empty set: ez pz
+  // Allocate a new array, contains unintialized memory
+  var arr := new bool[size];
+  var i := 0;
+  while (i &lt; arr.length)
+  {
+      arr[i] := false;
+      i := i + 1;
+  }
+  this.arr := arr;
+}</code></pre>
+<p>
+ This looks right, but won’t actually compile. Not because it’s wrong:
+but because Dafny isn’t able to prove that it’s right. Modern SMT
+solvers are very cool but aren’t magical: sometimes we’re going to need
+to give Dafny a helping hand.
+</p>
+<p>
+ Firstly: Dafny ins’t able to prove that our
+ <code>
+  while
+ </code>
+ loop
+will always terminate. We can help Dafny out by writing “loop
+invariants”: an expression that will be true every pass through the
+loop. Here’s one that will help Dafny prove the loop terminates:
+</p>
+<pre class="dafny"><code>invariant 0 &lt;= i &lt;= arr.Length</code></pre>
+<p>
+ Dafny now complains it’s not able to prove that
+ <code>
+  valid()
+ </code>
+ will be true. We know that
+ <code>
+  spec == {}
+ </code>
+ , and in order for
+ <code>
+  valid()
+ </code>
+ to be true, we need to make sure that
+ <code>
+  arr
+ </code>
+ only contains
+ <code>
+  false
+ </code>
+ . We can convince Dafny
+we’ve done this by adding an invariant showing that every time through
+the loop, we make progress towards every element being
+ <code>
+  false
+ </code>
+ :
+</p>
+<pre class="dafny"><code>invariant forall j : nat :: j &lt; i ==&gt; arr[i] == false</code></pre>
+<p>
+ Breaking this down:
+</p>
+<ul>
+ <li>
+  <code>
+   forall j : nat
+  </code>
+  This invariant will be true for every
+possible Natural number (numbers &gt;=
+  <code>
+   0
+  </code>
+  ). Assign
+  <code>
+   j
+  </code>
+  to be an arbitrary natural number.
+ </li>
+ <li>
+  <code>
+   j &lt; i ==&gt; arr[i] == false
+  </code>
+  : The
+  <code>
+   ==&gt;
+  </code>
+  operator is logical implication. So if
+  <code>
+   j &lt; i
+  </code>
+  then
+  <code>
+   arr[i]
+  </code>
+  must be
+  <code>
+   false
+  </code>
+  .
+ </li>
+ <li>
+  In total: this says that every array entry less than
+  <code>
+   i
+  </code>
+  will be
+  <code>
+   false
+  </code>
+  , and since
+  <code>
+   i
+  </code>
+  is always
+increasing: this loop will eventually fill the whole array. With these
+two invariants Dafny gives us the sign off.
+ </li>
+</ul>
+<h3 id="membership-check">
+ Membership Check
+</h3>
+<p>
+ First we’ll write the method for checking if a given number is in the
+set. Let’s again start with our specification:
+</p>
+<pre class="dafny"><code>method is_number(x : nat) returns (r : bool)
+requires valid()
+ensures valid()
+ensures r == (x in spec)
+{
+  ...
+}</code></pre>
+<p>
+ We’ve got one precondition and two post-conditions in the contract.
+First: we require that this method can only be called on a valid set.
+There’s no way we can guarantee anything about the method if you hand us
+a set that’s already in an inconsistent state. Secondly: we promise
+we’ll leave the set in valid state when we’re done. Finally, we promise
+that our return value
+ <code>
+  r
+ </code>
+ will be true if and only if
+ <code>
+  x
+ </code>
+ is indeed in the
+ <code>
+  spec
+ </code>
+ set. (Remember:
+ <code>
+  spec
+ </code>
+ is only around at compile-time, it doesn’t exist at
+all at runtime.
+</p>
+<p>
+ Here’s a first pass at implementing the body:
+</p>
+<pre class="dafny"><code>{
+  r := arr[x];
+}</code></pre>
+<p>
+ And again, Dafny complains. This time for actual mistake we’ve made.
+We didn’t check that
+ <code>
+  x
+ </code>
+ was in bounds of the array.
+</p>
+<p>
+ Pass #2:
+</p>
+<pre class="dafny"><code>{
+  if (x &lt; this.arr.Length) {
+    r := arr[x];
+  } else { // If `x` is out of bounds it can't be in the set
+    r := false;
+  }
+}</code></pre>
+<p>
+ And no complaints! Dafny was able to prove we met all the
+specifications by itself. Neat. You’ll note we only had to check the
+upper bound of the array, and didn’t check that
+ <code>
+  x
+ </code>
+ was
+greater than or equal to
+ <code>
+  0
+ </code>
+ , because we declared that
+ <code>
+  x
+ </code>
+ had type
+ <code>
+  nat
+ </code>
+ instead of
+ <code>
+  int
+ </code>
+ .
+</p>
+<h3 id="insertion">
+ Insertion
+</h3>
+<p>
+ Finally, let’s write the method for inserting elements into the set.
+As usual, we’ll start with the spec:
+</p>
+<pre class="dafny"><code>// Attempt to insert `x` into the set.
+// Returns `false` if insertion fails
+method insert(x : nat) returns (r : bool)
+requires valid()
+ensures valid()
+...</code></pre>
+<p>
+ Again we require a valid set and promise to return a valid set.
+</p>
+<pre class="dafny"><code>...
+ensures !r ==&gt; spec == old(spec)
+...</code></pre>
+<p>
+ If
+ <code>
+  r
+ </code>
+ is false (meaning that insertion failed), we want
+to ensure that the set is unchanged. The
+ <code>
+  old()
+ </code>
+ syntax
+allows us to refer to the value of
+ <code>
+  spec
+ </code>
+ when we entered the
+method. So we assert that if
+ <code>
+  r
+ </code>
+ is false, the value of
+ <code>
+  spec
+ </code>
+ must be equal to what it was when the method was
+called.
+</p>
+<pre class="dafny"><code>...
+ensures r ==&gt; spec == old(spec) + {x}
+...</code></pre>
+<p>
+ On the other hand, if
+ <code>
+  r
+ </code>
+ is true, we want
+ <code>
+  spec
+ </code>
+ to be equal to the union of its original value and the
+set containing just
+ <code>
+  x
+ </code>
+ .
+</p>
+<pre><code>...
+modifies this
+modifies this.arr</code></pre>
+<p>
+ Finally: Dafny requires us to annotate what fields we’re going to
+mutate. To repeat: here’s the full spec:
+</p>
+<pre><code>method insert(x : nat) returns (r : bool)
+requires valid()
+ensures valid()
+ensures !r ==&gt; spec == old(spec)
+ensures r ==&gt; spec == old(spec) + {x}
+modifies this
+modifies this.arr
+{
+  ...
+}</code></pre>
+<p>
+ And now for the body:
+</p>
+<pre><code>{
+  if (x &lt; this.arr.Length) {
+    // Update the spec.
+    spec := spec + {x};
+    // Update the real array
+    arr[x] := true;
+    // Insertion succeeds
+    r := true;
+  } else {
+    r := false;
+  }
+}</code></pre>
+<p>
+ And again: Dafny is able to prove it all automatically. It might seem
+weird that we can update the value of
+ <code>
+  spec
+ </code>
+ , since we said
+it doesn’t exist at runtime. That update is only used for the purposes
+of proving things, and dafny is able to verify that the value of
+ <code>
+  spec
+ </code>
+ doesn’t actually influence the return value of this
+method in any way. If it did, it would be an error.
+</p>
+<h2 id="recap">
+ Recap
+</h2>
+<p>
+ We’ve proven that a simple set implementation corresponds to Dafny’s
+mathematical Set object. This isn’t a very good set implementation
+though (it allocates enough space to store every member of the set even
+when the set is empty), so next time we’ll follow the same methodology,
+but for a much cooler data structure.
+</p>
+</article>
+        </main>
+    </body>
+</html>

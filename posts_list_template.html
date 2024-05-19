@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+    <meta charset="UTF-8" />
+    <head>
+        {{head_contents|safe}}
+        <title>Posts</title>
+    </head>
+    <body>
+        {{navbar|safe}}
+        <main>
+            <article>
+                <h1>Posts</h1>
+                <ul>
+                    {% for post in posts %}
+                    <li>
+                        <a href="{{post.link}}">{{post.title}}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </article>
+        </main>
+    </body>
+</html>

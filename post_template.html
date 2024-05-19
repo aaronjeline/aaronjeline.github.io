@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+    <meta charset="UTF-8" />
+    <head>
+        {{head_content|safe}}
+        <meta name="author" content="{{ author }}" />
+        <meta name="dcterms.date" content="{{ date }}" />
+        <title>{{title}}</title>
+    </head>
+    <body>
+        {{navbar|safe}}
+        <main>
+            <h1>{{title}}</h1>
+            <div class="metadata">
+                <p class="author">{{author}}</p>
+                <p class="metadata-sep">•</p
+                <p class="date">{{date}}</p>
+            </div>
+            <article>{{ content|safe }}</article>
+        </main>
+    </body>
+</html>
