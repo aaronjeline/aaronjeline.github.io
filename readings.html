@@ -1,0 +1,432 @@
+<!doctype html>
+<html>
+    <meta charset="UTF-8" />
+    <head>
+        <link rel="stylesheet" href="/style.css?ver=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+    rel="stylesheet"
+<link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400;1,700&family=Lobster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400;1,700&family=Lobster&family=Roboto:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+
+<script>hljs.highlightAll();</script>
+
+        <title>Readings</title>
+    </head>
+    <body>
+        <header>
+    <a href="/index.html">Aaron Eline</a>
+    <nav>
+        <a href="/posts.html">Posts</a>
+        <a href="/readings.html">Readings</a>
+    </nav>
+</header>
+
+        <main>
+            <h1>Readings</h1>
+            <article><p>
+ This page contains a collections of interesting resources, across a
+variety of topics. My main criterion for posting here is that I found it
+interesting or useful. My only rule is that I have to have actually read
+it to post it here. Suggestions always welcome. Page inspired by the
+great one at
+ <a href="https://mcyoung.xyz/syllabus">
+  mcyoung.xyz
+ </a>
+ .
+</p>
+<h2 id="programming-language-theorytype-theory">
+ Programming Language
+Theory/Type Theory
+</h2>
+<p>
+ Resources on the formal definitions of programming languages and type
+systems. While real languages are always more than theoretical models,
+it’s essential to ground in these models. You can prevent making
+mistakes that have been made before, have consistency in your design,
+and make sure that your type system actually guarantees something.
+</p>
+<ul>
+ <li>
+  By the god Benjamin Pierce
+  <ul>
+   <li>
+    <a href="https://softwarefoundations.cis.upenn.edu">
+     Software
+Foundations
+    </a>
+    The first two volumes have you learning the Coq proof
+assistant and build up to your formalizing and proving things about
+simple imperative and functional languages, as well as a simple type
+system and all of the basic extensions. It’s a great foundational text.
+(Many more people than just Benjamin Pierce contributed to this)
+   </li>
+   <li>
+    <a href="https://www.cis.upenn.edu/~bcpierce/tapl/">
+     Types and
+Programming Languages
+    </a>
+    TAPL is a masterpiece. It goes into greater
+depth on topics than SF, at the cost of not all being formalized in
+Coq.
+   </li>
+   <li>
+    <a href="https://www.cis.upenn.edu/~bcpierce/attapl/">
+     Advanced
+Topics in Types and Programming Languages
+    </a>
+    ATAPL Covers a bunch of
+the wacky things not covered in TAPL, such as: types systems for
+assembly languages, dependent types, substructural types.
+   </li>
+  </ul>
+ </li>
+ <li>
+  <a href="https://www.plai.org/3/2/PLAI%20Version%203.2.2%20electronic.pdf">
+   Programming
+Languages: Applications and Interpretations
+  </a>
+  Introduces a wide
+variety of languages features and ideas via simple interpreters.
+ </li>
+ <li>
+  <a href="https://thelittletyper.com/">
+   The Little Typer
+  </a>
+  A very
+cool Socratic style introduction to dependent type theory
+ </li>
+ <li>
+  <a href="https://mitp-content-server.mit.edu/books/content/sectbyfn/books_pres_0/6515/sicp.zip/full-text/book/book-Z-H-25.html#%_chap_4">
+   Interpreters
+Chapter from SICP
+  </a>
+  Fun chapter on implementing a core interpreter for
+a simple functional language and expanding it with wacky features
+ </li>
+</ul>
+<h2 id="programming-language-design">
+ Programming Language Design
+</h2>
+<p>
+ Moving away from considering languages as abstract mathematical
+objects, this is a series of posts that talk about language
+ <em>
+  design
+ </em>
+ .
+</p>
+<ul>
+ <li>
+  <a href="https://without.boats/blog/let-futures-be-futures/">
+   Let
+Futures Be Futures
+  </a>
+  Notes on the design of async Rust.
+ </li>
+ <li>
+  <a href="https://without.boats/blog/ownership/">
+   Ownership
+  </a>
+  How to
+take advantage of substructural type systems in a language
+ </li>
+ <li>
+  <a href="https://without.boats/blog/references-are-like-jumps/">
+   References
+are like jumps
+  </a>
+  on how languages can enable or interface with “local
+reasoning” about whether your program is correct
+ </li>
+ <li>
+  <a href="https://graydon2.dreamwidth.org/307291.html">
+   The Rust I
+wanted had no future
+  </a>
+  Essay from Graydon Hoare, the original creator
+of Rust, about how the project has diverged from where he thought it
+would go. Talks about why it diverged and how.
+ </li>
+ <li>
+  <a href="https://fasterthanli.me/articles/i-want-off-mr-golangs-wild-ride">
+   I
+want off Mr. Golang’s Wild Ride
+  </a>
+  on how languages (and specifically
+their standard libraries and type systems) can help make software either
+robust or fragile.
+ </li>
+</ul>
+<h2 id="compilers">
+ Compilers
+</h2>
+<p>
+ Notes on (usually optimizing) compilers. Fast languages use
+compilers. Compilers are cool. I like compilers.
+</p>
+<ul>
+ <li>
+  Undefined behaviour
+ </li>
+ <li>
+  <a href="https://blog.regehr.org/archives/213">
+   A Guide to Undefined
+Behaviour in C and C++
+  </a>
+  ,
+  <a href="https://blog.regehr.org/archives/226">
+   Part 2
+  </a>
+  ,
+  <a href="https://blog.regehr.org/archives/232">
+   Part 3
+  </a>
+  A guide to
+thinking about what undefined behaviour means. An important quote form
+the article:
+ </li>
+</ul>
+<blockquote>
+ <p>
+  It is very common for people to say — or at least think — something
+like this: The x86 ADD instruction is used to implement C’s signed add
+operation, and it has two’s complement behavior when the result
+overflows. I’m developing for an x86 platform, so I should be able to
+expect two’s complement semantics when 32-bit signed integers overflow.
+THIS IS WRONG. You are saying something like this: Somebody once told me
+that in basketball you can’t hold the ball and run. I got a basketball
+and tried it and it worked just fine. He obviously didn’t understand
+basketball.
+ </p>
+</blockquote>
+<ul>
+ <li>
+  <a href="https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html">
+   What
+Every C Programmer Should Know About Undefined Behaviour
+  </a>
+  <a href="https://blog.llvm.org/2011/05/what-every-c-programmer-should-know_14.html">
+   Part
+2
+  </a>
+  <a href="https://blog.llvm.org/2011/05/what-every-c-programmer-should-know_21.html">
+   Part
+3
+  </a>
+  Explains a lot of the optimizations that undefined behaviour
+enables. If you’re a language safety advocate (like me), it’s important
+to understand this.
+ </li>
+ <li>
+  <a href="https://faultlore.com/blah/rust-layouts-and-abis/">
+   Notes on
+Type Layout and ABIs in Rust
+  </a>
+  and
+  <a href="https://faultlore.com/blah/swift-abi/">
+   How Swift Achieved Dynamic
+Linking Where Rust Couldn’t
+  </a>
+  and
+  <a href="https://faultlore.com/blah/c-isnt-a-language/">
+   C isn’t a
+Programming Language Anymore
+  </a>
+  The best collections of articles on
+dynamic linking/ABIs.
+ </li>
+ <li>
+  <a href="https://xavierleroy.org/publi/compcert-CACM.pdf">
+   Formal
+verification of a realistic compiler
+  </a>
+  The CompCERT project: a
+formally verified compiler for C
+ </li>
+ <li>
+  <a href="https://xavierleroy.org/courses/EUTypes-2019/">
+   Proving the
+correctness of a compiler
+  </a>
+  By the same author as the above, but about
+a much simpler language
+ </li>
+ <li>
+  <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/1987/01/slpj-book-1987-small.pdf">
+   The
+implementation of functional programming languages
+  </a>
+  Implementing a
+compiler/runtime for a lazy,functional programming language (think
+Haskell)
+ </li>
+</ul>
+<h2 id="security">
+ Security
+</h2>
+<ul>
+ <li>
+  <a href="https://cglab.ca/~abeinges/blah/robinhood-part-1/">
+   Building
+a HashMap in Rust
+  </a>
+  I promise this is actually a security article
+ </li>
+ <li>
+  <a href="http://www.pl-enthusiast.net/2014/07/21/memory-safety/">
+   What is
+memory safety
+  </a>
+  Getting a good rigorous definition of memory
+safety
+ </li>
+ <li>
+  <a href="http://www.pl-enthusiast.net/2018/08/13/security-programming-languages-issue/">
+   Software
+Security is a Programming Languages Issue
+  </a>
+  Makes the argument that PL
+theory/design is essential for improving the security of the
+ecosystem.
+ </li>
+ <li>
+  <a href="https://arxiv.org/pdf/2403.04651">
+   Cedar: a new language for
+Authorization
+  </a>
+  Paper on the Cedar language I was (and am) involved
+with designing
+ </li>
+</ul>
+<h2 id="automated-reasoningformal-methods">
+ Automated Reasoning/Formal
+Methods
+</h2>
+<p>
+ This topic is really cool. It’s also frustratingly opaque. There is
+no equivalent of “software foundations” for other AR techniques, and
+that’s a shame.
+</p>
+<ul>
+ <li>
+  <a href="https://courses.cs.washington.edu/courses/cse507/21au/calendar.html">
+   CSE
+507 - Computer Aided Reasoning for Software
+  </a>
+  Great course
+ </li>
+ <li>
+  <a href="https://docs.racket-lang.org/rosette-guide/index.html">
+   The
+Rosette Guide
+  </a>
+  A cool tool for solver assisted programming
+ </li>
+ <li>
+  <a href="https://brooker.co.za/blog/2024/04/17/formal.html">
+   Formal
+Methods: Just Good Engineering Practice?
+  </a>
+ </li>
+ <li>
+  <a href="https://brooker.co.za/blog/2022/06/02/formal.html">
+   Formal
+Methods only solve half my problems
+  </a>
+ </li>
+ <li>
+  Decision Procedures by Daniel Kroenig
+ </li>
+ <li>
+  Handbook of Satisfiability, second edition
+ </li>
+</ul>
+<h2 id="things-that-will-bite-you">
+ Things That Will Bite You
+</h2>
+<ul>
+ <li>
+  <a href="https://tonsky.me/blog/unicode/">
+   The Absolute Minimum Every
+Software Developer Must Know About Unicode
+  </a>
+  ASCII is dead. This isn’t
+that complicated if your read it.
+ </li>
+ <li>
+  <a href="https://faultlore.com/blah/text-hates-you/">
+   Text Rendering
+Hates You
+  </a>
+ </li>
+ <li>
+  <a href="https://infiniteundo.com/post/25326999628/falsehoods-programmers-believe-about-time">
+   Falsehoods
+programmers believe about timezones
+  </a>
+  ## Systems - distributed or
+otherwise
+ </li>
+ <li>
+  <a href="https://brooker.co.za/blog/2022/10/04/commitment.html">
+   Atomic
+Commitment: The Unscalability Protocol
+  </a>
+ </li>
+ <li>
+  <a href="https://brooker.co.za/blog/2024/06/04/scale.html">
+   Not Just
+Scale
+  </a>
+  What’s the point of this cloud thing anyway?
+ </li>
+ <li>
+  <a href="https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s11-bronson.pdf">
+   Metastable
+Failures in Distributed Systems
+  </a>
+ </li>
+ <li>
+  <a href="https://www.cs.columbia.edu/~junfeng/17sp-e6121/papers/ironfleet.pdf">
+   IronFleet:
+Proving Practical Distributed Systems Correct
+  </a>
+ </li>
+</ul>
+<h2 id="software-engineering">
+ Software Engineering
+</h2>
+<ul>
+ <li>
+  <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">
+   Parse,
+don’t validate
+  </a>
+ </li>
+ <li>
+  <a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">
+   Choosing
+Properties for Property Based Testing
+  </a>
+ </li>
+ <li>
+  <a href="https://arxiv.org/pdf/2407.01688">
+   How we build Cedar: A
+Verification Guided Approach
+  </a>
+  Paper on our development methodology
+for Cedar
+ </li>
+</ul>
+</article>
+        </main>
+    </body>
+</html>
