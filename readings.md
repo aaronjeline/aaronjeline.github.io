@@ -136,6 +136,7 @@ shame.
 * [Text Rendering Hates You](https://faultlore.com/blah/text-hates-you/)
 * [Falsehoods programmers believe about
   timezones](https://infiniteundo.com/post/25326999628/falsehoods-programmers-believe-about-time)
+
 ## Systems - distributed or otherwise
 * [Atomic Commitment: The Unscalability
   Protocol](https://brooker.co.za/blog/2022/10/04/commitment.html)
