@@ -47,7 +47,7 @@ this is a series of posts that talk about language _design_.
   advantage of substructural type systems in a language
 * [References are like
   jumps](https://without.boats/blog/references-are-like-jumps/) on
-  how languages can enable or interface with "local reasoning" about
+  how languages can enable or interfere with "local reasoning" about
   whether your program is correct
 * [The Rust I wanted had no
   future](https://graydon2.dreamwidth.org/307291.html) Essay from
