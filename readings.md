@@ -63,7 +63,11 @@ this is a series of posts that talk about language _design_.
 Notes on (usually optimizing) compilers. Fast languages use compilers.
 Compilers are cool. I like compilers.
 
-* Undefined behaviour
+* [MinCaml](https://esumii.github.io/min-caml/paper.pdf) Paper on a nice
+  simple compiler for functional languages.
+* [CS
+  6120](https://www.cs.cornell.edu/courses/cs6120/2020fa/self-guided/)
+  Not a reading, but a set of lectures. 
 * [A Guide to Undefined Behaviour in C and
   C++](https://blog.regehr.org/archives/213),[Part
   2](https://blog.regehr.org/archives/226),[Part 3](https://blog.regehr.org/archives/232) A guide to thinking about what undefined behaviour means.
