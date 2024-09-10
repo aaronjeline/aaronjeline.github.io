@@ -49,6 +49,11 @@ this is a series of posts that talk about language _design_.
   jumps](https://without.boats/blog/references-are-like-jumps/) on
   how languages can enable or interfere with "local reasoning" about
   whether your program is correct
+* Oxidizing OCaml
+  [Locality](https://blog.janestreet.com/oxidizing-ocaml-locality/) and
+  [Ownership](https://blog.janestreet.com/oxidizing-ocaml-ownership/).
+  Two great posts on retrofitting a more performant semantics into
+  OCaml.
 * [The Rust I wanted had no
   future](https://graydon2.dreamwidth.org/307291.html) Essay from
   Graydon Hoare, the original creator of Rust, about how the project has
@@ -69,8 +74,8 @@ Compilers are cool. I like compilers.
   6120](https://www.cs.cornell.edu/courses/cs6120/2020fa/self-guided/)
   Not a reading, but a set of lectures. 
 * [A Guide to Undefined Behaviour in C and
-  C++](https://blog.regehr.org/archives/213),[Part
-  2](https://blog.regehr.org/archives/226),[Part 3](https://blog.regehr.org/archives/232) A guide to thinking about what undefined behaviour means.
+  C++](https://blog.regehr.org/archives/213), and [Part
+  2](https://blog.regehr.org/archives/226),and [Part 3](https://blog.regehr.org/archives/232) A guide to thinking about what undefined behaviour means.
   An important quote form the article:
 
 > It is very common for people to say — or at least think — something like this:
@@ -79,7 +84,7 @@ Compilers are cool. I like compilers.
 > Somebody once told me that in basketball you can’t hold the ball and run. I got a basketball and tried it and it worked just fine. He obviously didn’t understand basketball.
 
 * [What Every C Programmer Should Know About Undefined
-  Behaviour](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html) [Part 2](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know_14.html) [Part 3](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know_21.html)
+  Behaviour](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html) and [Part 2](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know_14.html) [Part 3](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know_21.html)
     Explains a lot of the optimizations that undefined behaviour
     enables. If you're a language safety advocate (like me), it's important to understand this.
 * [Notes on Type Layout and ABIs in
@@ -150,11 +155,17 @@ shame.
   Systems](https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s11-bronson.pdf)
 * [IronFleet: Proving Practical Distributed Systems
   Correct](https://www.cs.columbia.edu/~junfeng/17sp-e6121/papers/ironfleet.pdf)
+* [What Goes Around Comes
+  Around](https://15721.courses.cs.cmu.edu/spring2020/papers/01-intro/whatgoesaround-stonebraker.pdf)
+  Short history of data models
 
 
 ## Software Engineering
 * [Parse, don't
   validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+* [Software Reliability : What Is Property-Based
+  Testing?](https://antithesis.com/blog/reliability_series_part_1/)
+  Introduction to property based testing.
 * [Choosing Properties for Property Based
   Testing](https://fsharpforfunandprofit.com/posts/property-based-testing-2/)
 * [How we build Cedar: A Verification Guided
