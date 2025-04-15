@@ -4,7 +4,7 @@
 
 I'm a computer science researcher in the field of Automated Reasoning.
 My principal vision is exploring how we can develop computer systems
-that are order of magnitude more trustworthy than our current designs.
+that are orders of magnitude more trustworthy than our current designs.
 My current research focuses on:
 
 - Programming Language Theory/Design
@@ -14,8 +14,11 @@ My current research focuses on:
 
 I currently work as an applied scientist at Amazon Web Services, in the
 Automated Reasoning Group. 
-I'm developing [Cedar](cedarpolicy.com), which is a DSL for writing authorization
-rules, as well as working on a new software engineering workflow we call
+I'm working on developing program reasoning at scale, using both
+traditional static analysis, automated reasoning, language models, and
+random testing.
+Previously, I worked on [Cedar](cedarpolicy.com), which is a DSL for writing authorization
+rules, as well as outlining a new software engineering workflow we call
 "Verification-Guided Development".
 I'm also deeply interesting in computing history, and developing a better vision of why our systems evolved the way they did.
 

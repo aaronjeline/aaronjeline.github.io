@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 from typing import List
 from jinja2 import Environment, FileSystemLoader
 from bs4 import BeautifulSoup, Tag
