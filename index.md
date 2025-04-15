@@ -22,6 +22,10 @@ rules, as well as outlining a new software engineering workflow we call
 "Verification-Guided Development".
 I'm also deeply interesting in computing history, and developing a better vision of why our systems evolved the way they did.
 
+I help run the wonderful [DC Systems](https://dcsystems.xyz), which is a
+local meetup to chat about systems, performance, testing, and formal methods.
+If you'd like give a talk, please reach out!
+
 ## Contact
 
 I can reached at:
