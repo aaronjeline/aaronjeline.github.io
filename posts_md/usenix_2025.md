@@ -3,7 +3,7 @@
 % August 17, 2025
 # USENIX 2025 Travel Blog  
   
-This past week I attended the 25th USENIX Security conference. I had a great a time and met a bunch of wonderful people. Wanted to take a bit and gather my thoughts on the work I saw presented.   
+This past week I attended the 34th USENIX Security conference. I had a great a time and met a bunch of wonderful people. Wanted to take a bit and gather my thoughts on the work I saw presented.   
   
 ## Conference Format   
   
