@@ -7,7 +7,8 @@ Each machine has a set of buttons, you need to figure out the correct
 order to press those buttons in.</p>
 <p>You’re given a puzzle input that looks like this:</p>
 <pre><code>(3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}</code></pre>
-<p>Quoting from the puzzle: The machines each have a set of numeric
+<blockquote style="border-left: 4px solid #ccc; padding-left: 1em; margin-left: 0; color: #555; background-color: #f9f9f9; padding: 1em;">
+<p>The machines each have a set of numeric
 counters tracking its joltage levels, one counter per joltage
 requirement. The counters are all initially set to zero.</p>
 <p>So, joltage requirements like {3,5,4,7} mean that the machine has
@@ -24,16 +25,17 @@ would change them to be {0,2,2,4}.</p>
 <p>You can push each button as many times as you like. However, your
 finger is getting sore from all the button pushing, and so you will need
 to determine the fewest total presses required to correctly configure
-each machine’s joltage level counters to match the specified joltage
+each machine's joltage level counters to match the specified joltage
 requirements.</p>
-<p>Going off our example: Configuring the first machine’s counters
+<p>Going off our example: Configuring the first machine's counters
 requires a minimum of 10 button presses. One way to do this is by
 pressing (3) once, (1,3) three times, (2,3) three times, (0,2) once, and
 (0,1) twice.</p>
 <p>Your puzzle input a list of machine specifications like the above,
-the Analyze each machine’s joltage requirements and button wiring
+the Analyze each machine's joltage requirements and button wiring
 schematics. What is the fewest button presses required to correctly
 configure the joltage level counters on all of the machines?</p>
+</blockquote>
 <h2 id="solving-it-part-1-poorly">Solving it part 1: poorly</h2>
 <p>My first solution involved thinking of it as a graph search problem.
 Each set of “current jotlages” was a node, each button gave you an edge
