@@ -35,8 +35,7 @@ the Analyze each machine’s joltage requirements and button wiring
 schematics. What is the fewest button presses required to correctly
 configure the joltage level counters on all of the machines?</p>
 <h2 id="solving-it">Solving it</h2>
-<p>This problem is a natural fit for an SMT (Satisfiability Modulo
-Theories) solver. We can express the puzzle as a system of linear
+<p>This problem is a natural fit for an SMT solver. We can express the puzzle as a system of linear
 integer constraints and ask Z3 to find the minimum solution.</p>
 <p>Each button press is independent - pressing button A then button B
 has the same effect as pressing B then A. This means we only care about
