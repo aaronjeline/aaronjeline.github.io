@@ -1,0 +1,243 @@
+<meta charset="UTF8">
+<h1 id="aoc-2025-day-2-puzzle-via-smt-solver">AOC 2025 day 2 puzzle via
+SMT Solver</h1>
+<h2 id="the-puzzle">The puzzle:</h2>
+<p>The puzzle involves made-up machines that have a “joltage” setting.
+Each machine has a set of buttons, you need to figure out the correct
+order to press those buttons in.</p>
+<p>You’re given a puzzle input that looks like this:</p>
+<pre><code>(3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}</code></pre>
+<p>Quoting from the puzzle: The machines each have a set of numeric
+counters tracking its joltage levels, one counter per joltage
+requirement. The counters are all initially set to zero.</p>
+<p>So, joltage requirements like {3,5,4,7} mean that the machine has
+four counters which are initially 0 and that the goal is to
+simultaneously configure the first counter to be 3, the second counter
+to be 5, the third to be 4, and the fourth to be 7.</p>
+<p>Each button now indicates which counters it affects, where 0 means
+the first counter, 1 means the second counter, and so on. When you push
+a button, each listed counter is increased by 1.</p>
+<p>So, a button wiring schematic like (1,3) means that each time you
+push that button, the second and fourth counters would each increase by
+1. If the current joltage levels were {0,1,2,3}, pushing the button
+would change them to be {0,2,2,4}.</p>
+<p>You can push each button as many times as you like. However, your
+finger is getting sore from all the button pushing, and so you will need
+to determine the fewest total presses required to correctly configure
+each machine’s joltage level counters to match the specified joltage
+requirements.</p>
+<p>Going off our example: Configuring the first machine’s counters
+requires a minimum of 10 button presses. One way to do this is by
+pressing (3) once, (1,3) three times, (2,3) three times, (0,2) once, and
+(0,1) twice.</p>
+<p>Your puzzle input a list of machine specifications like the above,
+the Analyze each machine’s joltage requirements and button wiring
+schematics. What is the fewest button presses required to correctly
+configure the joltage level counters on all of the machines?</p>
+<h2 id="solving-it">Solving it</h2>
+<p>This problem is a natural fit for an SMT (Satisfiability Modulo
+Theories) solver. We can express the puzzle as a system of linear
+integer constraints and ask Z3 to find the minimum solution.</p>
+<p>Each button press is independent - pressing button A then button B
+has the same effect as pressing B then A. This means we only care about
+<em>how many times</em> each button is pressed, not the order. That
+turns this into an optimization problem over integers.</p>
+<h3 id="modeling-as-smt-constraints">Modeling as SMT constraints</h3>
+<p>For the example input
+<code>(3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}</code>:</p>
+<p><strong>Variables</strong>: Create one integer variable per button
+representing how many times we press it:</p>
+<pre class="smt2"><code>(declare-const b0 Int)  ; button (3)
+(declare-const b1 Int)  ; button (1,3)
+(declare-const b2 Int)  ; button (2)
+(declare-const b3 Int)  ; button (2,3)
+(declare-const b4 Int)  ; button (0,2)
+(declare-const b5 Int)  ; button (0,1)</code></pre>
+<p><strong>Non-negativity</strong>: You can’t press a button negative
+times:</p>
+<pre class="smt2"><code>(assert (&gt;= b0 0))
+(assert (&gt;= b1 0))
+; ... etc</code></pre>
+<p><strong>Joltage constraints</strong>: Each counter’s final value must
+equal its target. The value is the sum of presses from all buttons that
+affect that counter:</p>
+<ul>
+<li>Counter 0 (target 3): affected by buttons (0,2) and (0,1) →
+<code>b4 + b5 = 3</code></li>
+<li>Counter 1 (target 5): affected by buttons (1,3) and (0,1) →
+<code>b1 + b5 = 5</code></li>
+<li>Counter 2 (target 4): affected by buttons (2), (2,3), (0,2) →
+<code>b2 + b3 + b4 = 4</code></li>
+<li>Counter 3 (target 7): affected by buttons (3), (1,3), (2,3) →
+<code>b0 + b1 + b3 = 7</code></li>
+</ul>
+<pre class="smt2"><code>(assert (= 3 (+ b4 b5)))
+(assert (= 5 (+ b1 b5)))
+(assert (= 4 (+ b2 b3 b4)))
+(assert (= 7 (+ b0 b1 b3)))</code></pre>
+<p><strong>Final Answer</strong> The final answer is just the sum of all
+the button press counts.</p>
+<pre class="smt2"><code>(declare-const answer Int)
+(assert (= answer (+ b0 b1 b2 b3 b4 b5)))</code></pre>
+<p><strong>Minimize total presses</strong>: By default, z3 just finds
+<em>a</em> satisfying answer. In this case, the puzzle requires that we
+find the smallest number of button presses. We can achieve this by
+telling z3 to minimize the final answer.</p>
+<pre class="smt2"><code>(minimize answer)
+(check-sat)
+(get-model)</code></pre>
+<h3 id="complete-example-test.smt2">Complete example (test.smt2)</h3>
+<pre class="smt2"><code>(set-logic QF_LIA)
+
+(declare-const b0 Int)
+(declare-const b1 Int)
+(declare-const b2 Int)
+(declare-const b3 Int)
+(declare-const b4 Int)
+(declare-const b5 Int)
+
+; Button 0: 3
+; Button 1: 1 3
+; Button 2: 2
+; Button 3: 2 3
+; Button 4: 0 2
+; Button 5: 0 1
+
+(assert (&gt;= b0 0))
+(assert (&gt;= b1 0))
+(assert (&gt;= b2 0))
+(assert (&gt;= b3 0))
+(assert (&gt;= b4 0))
+(assert (&gt;= b5 0))
+
+; j0 = b4 + b5 = 3
+(assert (= 3 (+ b4 b5)))
+; j1 = b1 + b5 = 5
+(assert (= 5 (+ b1 b5)))
+; j2 = b2 + b3 + b4 = 4
+(assert (= 4 (+ b2 b3 b4)))
+; j3 = b0 + b1 + b3 = 7
+(assert (= 7 (+ b0 b1 b3)))
+
+(minimize (+ b0 b1 b2 b3 b4 b5))
+
+(check-sat)
+(get-model)</code></pre>
+<p>Running this with <code>z3 test.smt2</code> gives us the optimal
+solution with 10 total presses.</p>
+<h3 id="implementation">Implementation</h3>
+<p>The Rust solution (<code>src/machine.rs</code>) automates this
+process: 
+<ol>
+    <li> Parse each machine specification</li>
+    <li> Generate SMT constraints using <code>build_constraints()</code></li>
+    <li> Write to a temp file and invoke Z3 </li>
+    <li> Parse the result to extract the minimized answer</li>
+</ol>
+</p>
+<p>The solver handles all the hard work of finding the optimal button
+press counts.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="kw">crate</span><span class="pp">::</span>temp<span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">lalrpop_util::</span>lalrpop_mod<span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">lazy_regex::</span>regex<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::io::prelude::</span><span class="op">*;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Macro nonsense to generate our parser</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="pp">lalrpop_mod!</span>(<span class="kw">pub</span> parser)<span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">// A machine is a</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="at">)]</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> Machine <span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> buttons<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">usize</span><span class="op">&gt;&gt;,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> joltage_target<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">usize</span><span class="op">&gt;,</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">// All the machines in a given problem are just a vector of machines</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">type</span> Machines <span class="op">=</span> <span class="dt">Vec</span><span class="op">&lt;</span>Machine<span class="op">&gt;;</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> parse_machines(s<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">-&gt;</span> Machines <span class="op">{</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="pp">parser::MachinesParser::</span>new()<span class="op">.</span>parse(s)<span class="op">.</span>unwrap()</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Machine <span class="op">{</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> new(buttons<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">usize</span><span class="op">&gt;&gt;,</span> joltage_target<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">usize</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>            buttons<span class="op">,</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            joltage_target<span class="op">,</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Compute the answer to the puzzle</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> run_solver(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> <span class="pp">std::io::</span><span class="dt">Result</span><span class="op">&lt;</span><span class="dt">usize</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create a temp file to store our constraints in</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="kw">mut</span> f <span class="op">=</span> <span class="pp">temp::</span>make_temp(<span class="st">&quot;.smt2&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Write constraints to file</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        <span class="kw">self</span><span class="op">.</span>build_constraints(<span class="op">&amp;</span><span class="kw">mut</span> f)<span class="op">?;</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Spawn z3 to solve constraints</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> result <span class="op">=</span> <span class="pp">std::process::Command::</span>new(<span class="st">&quot;z3&quot;</span>)</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>arg(<span class="pp">format!</span>(<span class="st">&quot;{}&quot;</span><span class="op">,</span> f<span class="op">.</span>path()<span class="op">.</span>display()))</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>output()<span class="op">?;</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> stdout <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from_utf8_lossy(<span class="op">&amp;</span>result<span class="op">.</span>stdout)<span class="op">;</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> stdout<span class="op">.</span>contains(<span class="st">&quot;unsat&quot;</span>) <span class="op">{</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>            <span class="pp">panic!</span>(<span class="st">&quot;{} Not satisfiable!&quot;</span><span class="op">,</span> <span class="kw">self</span>)<span class="op">;</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Parse the output using an awful hacky regex</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> re <span class="op">=</span> <span class="pp">regex!</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">(define-fun answer </span><span class="sc">\\</span><span class="st">(</span><span class="sc">\\</span><span class="st">) Int[ </span><span class="sc">\n</span><span class="st">]+([0-9]+)&quot;</span>)<span class="op">;</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> m <span class="op">=</span> re<span class="op">.</span>captures(<span class="op">&amp;</span>stdout)<span class="op">.</span>expect(<span class="st">&quot;should have found answer&quot;</span>)<span class="op">;</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> r<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> m</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>get(<span class="dv">1</span>)</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>expect(<span class="st">&quot;should have 1 capture&quot;</span>)</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>as_str()</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>parse()</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>        <span class="cn">Ok</span>(r)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Build the SMT file</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> build_constraints(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> f<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">impl</span> <span class="bu">Write</span>) <span class="op">-&gt;</span> <span class="pp">std::io::</span><span class="dt">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Write logic prelude</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>        <span class="co">// We want to use quantifier-free linear integer arithmatic</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>        <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(set-logic QF_LIA)&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> buttons<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>_<span class="op">&gt;</span> <span class="op">=</span> (<span class="dv">0</span><span class="op">..</span><span class="kw">self</span><span class="op">.</span>buttons<span class="op">.</span>len())<span class="op">.</span>map(<span class="op">|</span>i<span class="op">|</span> <span class="pp">format!</span>(<span class="st">&quot;b{i}&quot;</span>))<span class="op">.</span>collect()<span class="op">;</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>        <span class="co">// We will have one constant that tracks the amount of times we pushed each button</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>        <span class="co">// The count for each button must be greater than or equal to zero</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>        <span class="co">// (ie: you can&#39;t push a button negative times)</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> b <span class="kw">in</span> buttons<span class="op">.</span>iter() <span class="op">{</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>            <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(declare-const {b} Int)&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>            <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(assert (&gt;= {b} 0))&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i<span class="op">,</span> target) <span class="kw">in</span> <span class="kw">self</span><span class="op">.</span>joltage_target<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>            <span class="co">// A button is &quot;contributing&quot; to joltage i if i effects</span></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>            <span class="co">// joltage i</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> contributing_buttons <span class="op">=</span> <span class="kw">self</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>buttons</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>iter()</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>enumerate()</span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>filter(<span class="op">|</span>(_<span class="op">,</span> b)<span class="op">|</span> b<span class="op">.</span>contains(<span class="op">&amp;</span>i))</span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>map(<span class="op">|</span>(idx<span class="op">,</span> _)<span class="op">|</span> <span class="pp">format!</span>(<span class="st">&quot;b{idx}&quot;</span>))</span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span><span class="pp">collect::</span><span class="op">&lt;</span><span class="dt">Vec</span><span class="op">&lt;</span>_<span class="op">&gt;&gt;</span>()</span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>join(<span class="st">&quot; &quot;</span>)<span class="op">;</span></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>            <span class="co">// The sum of all the contributing buttons must be equal to</span></span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>            <span class="co">// the target</span></span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>            <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(assert (= {target} (+ {contributing_buttons})))&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>        <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(declare-const answer Int)&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>        <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(assert (= answer (+ {})))&quot;</span><span class="op">,</span> buttons<span class="op">.</span>join(<span class="st">&quot; &quot;</span>))<span class="op">?;</span></span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Epilogue</span></span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>        <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(minimize answer)&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>        <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(check-sat)&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>        <span class="pp">writeln!</span>(f<span class="op">,</span> <span class="st">&quot;(get-model)&quot;</span>)<span class="op">?;</span></span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>        <span class="cn">Ok</span>(())</span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
