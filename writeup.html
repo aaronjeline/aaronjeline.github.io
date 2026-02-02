@@ -67,6 +67,11 @@ alt="BFS state space explosion - 10,000 nodes explored without finding solution"
 <figcaption aria-hidden="true">BFS state space explosion - 10,000 nodes
 explored without finding solution</figcaption>
 </figure>
+<p>There are eight buttons, meaning every node has a branching factor of 8.
+That means by level <em>n</em> we will have explored up to 8<sup>n</sup> nodes.
+Since each button press can only increment a joltage counter by one,
+hitting a target of 67 requires <em>at least</em> 67 button presses&mdash;meaning
+8<sup>67</sup> &asymp; 1.2 &times; 10<sup>60</sup> nodes to explore. This will not work.</p>
 <h2 id="solving-it-part-2-good-style">Solving it part 2: good
 style!</h2>
 <p>The trick here is this: Each button press is independent - pressing
