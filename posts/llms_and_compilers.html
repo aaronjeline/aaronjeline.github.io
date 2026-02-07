@@ -1,0 +1,45 @@
+<meta charset="UTF-8">
+
+<h1 id="some-thoughts-on-the-llms-as-compilers-analogy">Some Thoughts on
+the LLMs-as-compilers Analogy</h1>
+<p>There’s a common metaphor in discussions about LLMs and programming:
+they are the next version of compilers. This metaphor is attractive
+because, with certain use-modes, using an LLM can feel pretty similar to
+using a compiler: you describe to the computer the program you want: and
+out pops an executable.</p>
+<p>Alperen Keles wrote a <a
+href="https://alperenkeles.com/posts/llms-could-be-but-shouldnt-be-compilers/">nice
+post</a> about this, which you should also read, but I had a slightly
+different take. Alperen’s post is about what a high-level language
+is.</p>
+<p>I want to speak about what a <em>compiler</em> is, and why I think
+the metaphor doesn’t hold up perfectly. To me, solid, production ready
+compilers are not just pieces of code, they are artifacts of a software
+community. The issue isn’t that we have to absolutely sure that
+compilers don’t have bugs. While formal verification of compilers is
+possible, <em>very</em> few people use verified compilers. The major
+compilers: gcc, clang, javac, rustc, etc, all have bugs. None of them
+are formally verified. It’s not a mystery if a formally verified
+compiler would make this better, we know it for a fact. <a
+href="https://dl.acm.org/doi/10.1145/1993316.1993532">CSmith</a> found a
+whole bunch of bugs in C optimizers, and none in the verified optimizer
+in CompCert.</p>
+<p>The real differentiator is this: when there is a bug report, it is
+reliably possible to localize the fault in the source code of the
+compiler, repair that fault. Users of the compiler has a reasonably high
+level of assurance that same bug won’t re-emerge</p>
+<p>The first two points are enabled by compilers being traditional
+software instead of learned algorithms, the last by the fact that clang
+is not just code, but group of people that have certain engineering
+standards and practices, like testing. Each passing test in a regression
+suite is concrete evidence of a fault not being re-introduced. This
+isn’t possible with LLMs. You can’t do fault localization to find which
+weights caused the issue. Even if you could you couldn’t tweak it.
+(Interpretability research is trying! But has not succeeded yet) This is
+an important difference and will motivate classical, symbolic software
+sticking around. This isn’t to say LLMs won’t be used to generate some
+of that software (I think they will), or that natural language to code
+isn’t a useful tool (it is), or even that ML algorithms can’t be useful
+inside a compiler. Just that these are different technologies, and
+obscuring that with analogies is likely flattening an important
+distinction.</p>
