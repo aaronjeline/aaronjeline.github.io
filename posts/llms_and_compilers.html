@@ -1,34 +1,90 @@
-<meta charset="UTF-8">
+<!doctype html>
+<html>
+    <meta charset="UTF-8" />
+    <head>
+        <link rel="stylesheet" href="/style.css?ver=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto:wght@400;500;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
-<h1 id="some-thoughts-on-the-llms-as-compilers-analogy">Some Thoughts on
+
+<script>hljs.highlightAll();</script>
+
+        <meta name="author" content="Aaron Eline" />
+        <meta name="dcterms.date" content="February 06, 2026" />
+        <title>Some Thoughts on
+the LLMs-as-compilers Analogy</title>
+    </head>
+    <body>
+        <header>
+    <a href="/index.html">Aaron Eline</a>
+    <nav>
+        <a href="/posts.html">Posts</a>
+        <a href="/readings.html">Readings</a>
+    </nav>
+</header>
+
+        <main>
+            <h1>Some Thoughts on
 the LLMs-as-compilers Analogy</h1>
-<p>There’s a common metaphor in discussions about LLMs and programming:
+            <div class="metadata">
+                <p class="author">Aaron Eline</p>
+                <p class="metadata-sep">•</p
+                <p class="date">February 06, 2026</p>
+            </div>
+            <article><p>
+ There’s a common metaphor in discussions about LLMs and programming:
 they are the next version of compilers. This metaphor is attractive
 because, with certain use-modes, using an LLM can feel pretty similar to
 using a compiler: you describe to the computer the program you want: and
-out pops an executable.</p>
-<p>Alperen Keles wrote a <a
-href="https://alperenkeles.com/posts/llms-could-be-but-shouldnt-be-compilers/">nice
-post</a> about this, which you should also read, but I had a slightly
+out pops an executable.
+</p>
+<p>
+ Alperen Keles wrote a
+ <a href="https://alperenkeles.com/posts/llms-could-be-but-shouldnt-be-compilers/">
+  nice
+post
+ </a>
+ about this, which you should also read, but I had a slightly
 different take. Alperen’s post is about what a high-level language
-is.</p>
-<p>I want to speak about what a <em>compiler</em> is, and why I think
+is.
+</p>
+<p>
+ I want to speak about what a
+ <em>
+  compiler
+ </em>
+ is, and why I think
 the metaphor doesn’t hold up perfectly. To me, solid, production ready
 compilers are not just pieces of code, they are artifacts of a software
 community. The issue isn’t that we have to absolutely sure that
 compilers don’t have bugs. While formal verification of compilers is
-possible, <em>very</em> few people use verified compilers. The major
+possible,
+ <em>
+  very
+ </em>
+ few people use verified compilers. The major
 compilers: gcc, clang, javac, rustc, etc, all have bugs. None of them
 are formally verified. It’s not a mystery if a formally verified
-compiler would make this better, we know it for a fact. <a
-href="https://dl.acm.org/doi/10.1145/1993316.1993532">CSmith</a> found a
+compiler would make this better, we know it for a fact.
+ <a href="https://dl.acm.org/doi/10.1145/1993316.1993532">
+  CSmith
+ </a>
+ found a
 whole bunch of bugs in C optimizers, and none in the verified optimizer
-in CompCert.</p>
-<p>The real differentiator is this: when there is a bug report, it is
+in CompCert.
+</p>
+<p>
+ The real differentiator is this: when there is a bug report, it is
 reliably possible to localize the fault in the source code of the
 compiler, repair that fault. Users of the compiler has a reasonably high
-level of assurance that same bug won’t re-emerge</p>
-<p>The first two points are enabled by compilers being traditional
+level of assurance that same bug won’t re-emerge
+</p>
+<p>
+ The first two points are enabled by compilers being traditional
 software instead of learned algorithms, the last by the fact that clang
 is not just code, but group of people that have certain engineering
 standards and practices, like testing. Each passing test in a regression
@@ -42,4 +98,9 @@ of that software (I think they will), or that natural language to code
 isn’t a useful tool (it is), or even that ML algorithms can’t be useful
 inside a compiler. Just that these are different technologies, and
 obscuring that with analogies is likely flattening an important
-distinction.</p>
+distinction.
+</p>
+</article>
+        </main>
+    </body>
+</html>

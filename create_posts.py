@@ -11,7 +11,10 @@ template  = environment.get_template('posts_list_template.html')
 
 def load_posts() -> List[PostMetaData]:
     posts_dir = 'posts_md'
-    return [parse_metadata(os.path.join(posts_dir, f)) for f in os.listdir(posts_dir) if os.path.isfile(os.path.join(posts_dir, f))]
+    posts = [parse_metadata(os.path.join(posts_dir, f)) for f in os.listdir(posts_dir) if os.path.isfile(os.path.join(posts_dir, f))]
+    posts = [p for p in posts if not p.hidden]
+    posts.sort(key=lambda p: p.parsed_date(), reverse=True)
+    return posts
 
 
 def render_post_index(posts : List[PostMetaData]):

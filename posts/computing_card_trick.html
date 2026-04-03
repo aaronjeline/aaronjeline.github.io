@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+    <meta charset="UTF-8" />
+    <head>
+        <link rel="stylesheet" href="/style.css?ver=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto:wght@400;500;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+
+<script>hljs.highlightAll();</script>
+
+        <meta name="author" content="Aaron Eline" />
+        <meta name="dcterms.date" content="October, 26, 2025" />
+        <title>Computing A
+Card Trick, or: Nerd Sniped by the Magicians</title>
+    </head>
+    <body>
+        <header>
+    <a href="/index.html">Aaron Eline</a>
+    <nav>
+        <a href="/posts.html">Posts</a>
+        <a href="/readings.html">Readings</a>
+    </nav>
+</header>
+
+        <main>
+            <h1>Computing A
+Card Trick, or: Nerd Sniped by the Magicians</h1>
+            <div class="metadata">
+                <p class="author">Aaron Eline</p>
+                <p class="metadata-sep">•</p
+                <p class="date">October, 26, 2025</p>
+            </div>
+            <article><div style="text-align: center;">
+ <p>
+  <img src="/img/bug.png" style="width:60.0%"/>
+ </p>
+ <p>
+  <em>
+   A text to a friend when I realized my plight
+  </em>
+ </p>
+</div>
+<p>
+ Was having a nice chat with my dad when he hit me with a problem that
+consumed several of evenings. The claim was about a fact supposedly
+known for years among magicians, but instead of digging through a magic
+textbook from my dad’s library, clearly I should solve it myself.
+</p>
+<div style="text-align: center;">
+ <p>
+  <img src="/img/urban.png" style="width:60.0%"/>
+ </p>
+ <p>
+  <em>
+   Another desperate cry for help
+  </em>
+ </p>
+</div>
+<p>
+ Surely it wouldn’t be hard to find it computationally?
+</p>
+<div style="text-align: center;">
+ <p>
+  <img src="/img/harry.png" style="width:60.0%"/>
+ </p>
+ <p>
+  <em>
+   The problem statement
+  </em>
+ </p>
+</div>
+<h2 id="formalizing-the-problem">
+ Formalizing the problem:
+</h2>
+<p>
+ For a game of Texas Hold ’Em with with
+ <span class="math inline">
+  <em>
+   n
+  </em>
+ </span>
+ players, does there exist a deck
+of cards (
+ <span class="math inline">
+  <em>
+   d
+  </em>
+ </span>
+ ), such that, No
+matter what position the deck is cut at (0-52), player 0 wins the next
+hand?
+</p>
+<p>
+ (Magicians believe the answer is ‘yes’)
+</p>
+<h2 id="setup-representing-decks">
+ Setup: Representing Decks
+</h2>
+<p>
+ My initial idea was to try to find deck through random search. Given
+that there are
+ <em>
+  a lot
+ </em>
+ of decks of cards (
+ <span class="math inline">
+  52!
+ </span>
+ ), I figured performance was going to
+matter and some parallelism would probably be involved. Thus, I picked
+Rust as my implementation language.
+</p>
+<p>
+ Given that there are 52 values for a given card, a card is
+represented a single
+ <code>
+  u8
+ </code>
+ :
+</p>
+<div class="sourceCode" id="cb1">
+ <pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a aria-hidden="true" href="#cb1-1" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> Card(<span class="kw">pub</span> <span class="dt">u8</span>)<span class="op">;</span></span></code></pre>
+</div>
+<p>
+ A deck of cards is just an ordered sequence of cards, so it’s a
+</p>
+<div class="sourceCode" id="cb2">
+ <pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a aria-hidden="true" href="#cb2-1" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> Deck(<span class="kw">pub</span> <span class="dt">Vec</span><span class="op">&lt;</span>Card<span class="op">&gt;</span>)<span class="op">;</span></span>
+<span id="cb2-2"><a aria-hidden="true" href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a aria-hidden="true" href="#cb2-3" tabindex="-1"></a><span class="kw">impl</span> Deck <span class="op">{</span></span>
+<span id="cb2-4"><a aria-hidden="true" href="#cb2-4" tabindex="-1"></a>  <span class="co">/// Constructor for new decks</span></span>
+<span id="cb2-5"><a aria-hidden="true" href="#cb2-5" tabindex="-1"></a>  <span class="kw">pub</span> <span class="kw">fn</span> new_deck_order() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb2-6"><a aria-hidden="true" href="#cb2-6" tabindex="-1"></a>  <span class="co">/// Our operations on decks</span></span>
+<span id="cb2-7"><a aria-hidden="true" href="#cb2-7" tabindex="-1"></a>  <span class="kw">pub</span> <span class="kw">fn</span> cut(<span class="kw">self</span><span class="op">,</span> pos <span class="op">:</span> <span class="dt">usize</span>) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{}</span></span>
+<span id="cb2-8"><a aria-hidden="true" href="#cb2-8" tabindex="-1"></a>  <span class="kw">pub</span> <span class="kw">fn</span> draw(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span>) <span class="op">-&gt;</span> Card <span class="op">{}</span></span>
+<span id="cb2-9"><a aria-hidden="true" href="#cb2-9" tabindex="-1"></a>  <span class="kw">pub</span> <span class="kw">fn</span> shuffle(<span class="kw">self</span>) <span class="op">-&gt;</span> Card <span class="op">{}</span></span>
+<span id="cb2-10"><a aria-hidden="true" href="#cb2-10" tabindex="-1"></a>  <span class="co">/// Swap two cards at positions x and y</span></span>
+<span id="cb2-11"><a aria-hidden="true" href="#cb2-11" tabindex="-1"></a>  <span class="kw">pub</span> <span class="kw">fn</span> swap(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> x <span class="op">:</span> <span class="dt">usize</span><span class="op">,</span> y <span class="op">:</span> <span class="dt">usize</span>)</span>
+<span id="cb2-12"><a aria-hidden="true" href="#cb2-12" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
+<p>
+ With a simple proptest that cutting the deck twice should be a
+no-op
+</p>
+<div class="sourceCode" id="cb3">
+ <pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a aria-hidden="true" href="#cb3-1" tabindex="-1"></a><span class="kw">fn</span> cut_twice_roundtrip(cut_pos <span class="kw">in</span> <span class="dv">0usize</span><span class="op">..</span><span class="dv">52</span>) <span class="op">{</span></span>
+<span id="cb3-2"><a aria-hidden="true" href="#cb3-2" tabindex="-1"></a>  <span class="kw">let</span> deck <span class="op">=</span> <span class="pp">Deck::</span>new_deck_order()<span class="op">;</span></span>
+<span id="cb3-3"><a aria-hidden="true" href="#cb3-3" tabindex="-1"></a>  <span class="kw">let</span> d1 <span class="op">=</span> deck<span class="op">.</span>clone()<span class="op">.</span>cut(cut_pos)<span class="op">;</span></span>
+<span id="cb3-4"><a aria-hidden="true" href="#cb3-4" tabindex="-1"></a>  <span class="kw">let</span> d2 <span class="op">=</span> d1<span class="op">.</span>cut(<span class="dv">52</span> <span class="op">-</span> cut_pos)<span class="op">;</span></span>
+<span id="cb3-5"><a aria-hidden="true" href="#cb3-5" tabindex="-1"></a>  <span class="pp">assert_eq!</span>(deck<span class="op">,</span> d2)<span class="op">;</span></span>
+<span id="cb3-6"><a aria-hidden="true" href="#cb3-6" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
+<h2 id="try-1-genetic-algorithms">
+ Try #1: Genetic Algorithms
+</h2>
+<h2 id="try-2-hill-climbing">
+ Try #2: Hill Climbing
+</h2>
+<p>
+ Okay, so that didn’t work. Well let’s go simpler. We will try
+standard hill climbing with random restarts. Fortunatly, we’re in a
+discrete space. So we can know with confidence if we are in a local
+maxima. The algorithm becomes this: 1. Pick a random deck 2. Check the
+number of wins: if it’s 52: we’re done! 3. Try every pair of swaps,
+keeping the one that wins you the most games 4. If no swap increases
+your score -&gt; goto 1 Reuslts: This is a
+ <em>
+  very
+ </em>
+ hilly
+landscape. There are
+ <em>
+  lot’s
+ </em>
+ of decks that win 50 or 51 games,
+and many of them have no swaps that increase wins.
+</p>
+<h2 id="try-3-simulated-annealing">
+ Try #3: Simulated Annealing
+</h2>
+</article>
+        </main>
+    </body>
+</html>
