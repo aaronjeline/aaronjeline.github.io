@@ -1,0 +1,339 @@
+<!doctype html>
+<html>
+    <meta charset="UTF-8" />
+    <head>
+        <link rel="stylesheet" href="/style.css?ver=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto:wght@400;500;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+
+<script>hljs.highlightAll();</script>
+
+        <meta name="author" content="Aaron Eline" />
+        <meta name="dcterms.date" content="May 26, 2026" />
+        <title>NJPLS 2026 Trip Report</title>
+    </head>
+    <body>
+        <header>
+    <a href="/index.html">Aaron Eline</a>
+    <nav>
+        <a href="/posts.html">Posts</a>
+        <a href="/readings.html">Readings</a>
+    </nav>
+</header>
+
+        <main>
+            <h1>NJPLS 2026 Trip Report</h1>
+            <div class="metadata">
+                <p class="author">Aaron Eline</p>
+                <p class="metadata-sep">•</p
+                <p class="date">May 26, 2026</p>
+            </div>
+            <article><p>
+ Last Friday I attended NJPLS 2026 and wanted to write up some of the
+cool talks that I saw. I love NJPLS, the informal atmosphere and talks
+on work that is still in progress make for a great time. Many thanks to
+the organizers at Penn.
+</p>
+<h2 id="principal-gradual-type-inference">
+ Principal Gradual Type
+Inference
+</h2>
+<p>
+ David Van Horn talked about his work on Gradual Type Inference. If
+you’re not familiar with gradual typing, it’s the idea that you can
+intermix dynamic and static type checking in the same language. The
+pitch is often that you can start your project in the nice, loose,
+low-mental overhead world of dynamic types, and then as your project
+matures you can move things to static types piece by piece. The most
+popular gradually typed language is almost certainly TypeScript, which
+adds gradual typing to JavaScript.
+</p>
+<p>
+ Here’s an example:
+</p>
+<div class="sourceCode" id="cb1">
+ <pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb1-1"><a aria-hidden="true" href="#cb1-1" tabindex="-1"></a><span class="kw">function</span> <span class="fu">foo</span>(x <span class="op">:</span> <span class="dt">number</span>)<span class="op">:</span> <span class="dt">string</span> {</span>
+<span id="cb1-2"><a aria-hidden="true" href="#cb1-2" tabindex="-1"></a>    <span class="cf">if</span> (x <span class="op">===</span> <span class="dv">0</span>) {</span>
+<span id="cb1-3"><a aria-hidden="true" href="#cb1-3" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"test"</span><span class="op">;</span></span>
+<span id="cb1-4"><a aria-hidden="true" href="#cb1-4" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb1-5"><a aria-hidden="true" href="#cb1-5" tabindex="-1"></a>        <span class="cf">return</span> (x<span class="op">.</span><span class="fu">toFixed</span>())<span class="op">.</span><span class="fu">toString</span>()<span class="op">;</span></span>
+<span id="cb1-6"><a aria-hidden="true" href="#cb1-6" tabindex="-1"></a>    }</span>
+<span id="cb1-7"><a aria-hidden="true" href="#cb1-7" tabindex="-1"></a>}</span>
+<span id="cb1-8"><a aria-hidden="true" href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a aria-hidden="true" href="#cb1-9" tabindex="-1"></a><span class="kw">function</span> <span class="fu">bar</span>(x) {</span>
+<span id="cb1-10"><a aria-hidden="true" href="#cb1-10" tabindex="-1"></a>    <span class="cf">return</span> <span class="fu">foo</span>(x)<span class="op">;</span></span>
+<span id="cb1-11"><a aria-hidden="true" href="#cb1-11" tabindex="-1"></a>}</span>
+<span id="cb1-12"><a aria-hidden="true" href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a aria-hidden="true" href="#cb1-13" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="fu">bar</span>(<span class="st">"test"</span>))<span class="op">;</span></span></code></pre>
+</div>
+<p>
+ The function
+ <code>
+  foo
+ </code>
+ is statically typed, but the function
+ <code>
+  bar
+ </code>
+ and the toplevel call to
+ <code>
+  log
+ </code>
+ are not.
+Interactions between the untyped code and typed code still necessitate
+runtime type checking, as there may be type errors. In fact, there is a
+type error in the above code! We pass
+ <code>
+  "test"
+ </code>
+ to
+ <code>
+  foo
+ </code>
+ despite it not being a number. The interesting wrinkle
+is
+ <em>
+  where
+ </em>
+ this type error is reported (or, who is “blamed”). If
+we run this code we get:
+</p>
+<pre><code>TypeError: x.toFixed is not a function. (In 'x.toFixed()', 'x.toFixed' is undefined)</code></pre>
+<p>
+ With a line number pointing to
+ <code>
+  foo
+ </code>
+ . This is somewhat
+unsatisfying, as it’s not really
+ <code>
+  foo
+ </code>
+ ’s fault.
+ <code>
+  foo
+ </code>
+ declared statically that it takes a number, and
+ <code>
+  bar
+ </code>
+ broke that contract.
+</p>
+<p>
+ An alternative formulation of gradual types is so-called “sound
+gradual typing”, where these kinds of blame problems are properly
+resolved. Typed Racket is an example. Here’s the same program, rendered
+in Typed and untyped Racket: Module 1
+</p>
+<div class="sourceCode" id="cb3">
+ <pre class="sourceCode racket"><code class="sourceCode racket"><span id="cb3-1"><a aria-hidden="true" href="#cb3-1" tabindex="-1"></a><span class="co">#lang typed/racket</span></span>
+<span id="cb3-2"><a aria-hidden="true" href="#cb3-2" tabindex="-1"></a><span class="op">(</span><span class="kw">provide</span> foo<span class="op">)</span></span>
+<span id="cb3-3"><a aria-hidden="true" href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a aria-hidden="true" href="#cb3-4" tabindex="-1"></a><span class="op">(</span>: foo <span class="op">(</span>-&gt; Integer String<span class="op">))</span></span>
+<span id="cb3-5"><a aria-hidden="true" href="#cb3-5" tabindex="-1"></a><span class="op">(</span><span class="ex">define</span><span class="fu"> </span><span class="op">(</span>foo x<span class="op">)</span></span>
+<span id="cb3-6"><a aria-hidden="true" href="#cb3-6" tabindex="-1"></a>  <span class="op">(</span><span class="kw">if</span> <span class="op">(</span><span class="kw">zero?</span> x<span class="op">)</span></span>
+<span id="cb3-7"><a aria-hidden="true" href="#cb3-7" tabindex="-1"></a>      <span class="st">"test"</span></span>
+<span id="cb3-8"><a aria-hidden="true" href="#cb3-8" tabindex="-1"></a>      <span class="st">"beef"</span><span class="op">))</span></span></code></pre>
+</div>
+<p>
+ Module 2
+</p>
+<pre><code>#lang racket
+(require "mod1.rkt")
+
+(define (bar x) (foo x))</code></pre>
+<p>
+ Running module 2 gives us this error:
+</p>
+<pre><code>foo: contract violation
+  expected: exact-integer?
+  given: "test"
+  in: the 1st argument of
+      (-&gt; exact-integer? any)
+  contract from: /private/tmp/mod1.rkt
+  blaming: /private/tmp/mod2.rkt</code></pre>
+<p>
+ Note that the error here places the blame on the untyped module.
+</p>
+<p>
+ This was all setup for DVH’s talk, which raised an interesting point.
+As someone who lives mostly in the fully statically typed world, I’m
+used to thinking about types as being erased. They are a compile-time
+fiction we use to reason about the program. Types are used to describe a
+program’s meaning, but they do not affect a program’s meaning.
+</p>
+<p>
+ But in the gradually typed world this just isn’t true! Consider:
+</p>
+<pre><code>(define (foo x)
+  (if (zero? x) (add1 x) 32))
+
+(define (bar) (foo "test"))
+(bar)</code></pre>
+<p>
+ Here’s one type I could give foo:
+ <code>
+  (-&gt; Int Int)
+ </code>
+ , but
+this
+ <em>
+  changes
+ </em>
+ the meaning of my program! Running this program
+used to give
+ <code>
+  32
+ </code>
+ , now it errors! The talk went into the
+ramifications of this fact, and how we might start to think about
+gradual type inference such that it is always behavior preserving.
+</p>
+<h2 id="morphosyntactic-programming-case-mood-and-type-directed-disambiguation-for-turkish-like-syntax">
+ Morphosyntactic
+Programming: Case, Mood, and Type-Directed Disambiguation for
+Turkish-Like Syntax
+</h2>
+<p>
+ Joomy gave a great talk on a personal project of his: implementing a
+language that incorporates some of the grammatical features of Turkish
+into a programming language. The language is called Kip and there is an
+online implementation: https://kip-dili.github.io.
+</p>
+<p>
+ Now, I do not speak or read Turkish, so forgive me if I’ve got the
+details wrong, but here goes: In Kip, aspects of the program’s type are
+determined by certain grammatical structures in Turkish. For example, in
+Haskell, you mark effectful computations by explicitly stating it in the
+type:
+</p>
+<pre><code>helloWorld :: IO ()</code></pre>
+<p>
+ In Kip, you can do this implicitly by using the infinitive form of
+nouns. Kip also uses Turkish’s “case” grammatical construct to allow you
+to supply arguments to a function in any order.
+</p>
+<h2 id="semantics-operations-and-properties-of-p3109-floating-point-representations-in-lean">
+ Semantics,
+Operations, and Properties of P3109 Floating-Point Representations in
+Lean
+</h2>
+<p>
+ Apparently, IEEE is creating a new floating point standard! Tung-Che
+Chang gave this talk on IEEE P3109, a new standard that defines low
+precision floats, like float16, float8. These formats have become useful
+within machine learning workloads. The previous standard (IEEE 754)
+defined two float formats: float32 and float64. This one is different,
+it defines the float format parametrically, allowing you to pick any
+precision you want and still have a standard to work from. It also
+introduces new rounding and saturation modes. This talk walked through
+the format, which was interesting in and of itself, but also walked
+through a new project to formalize the format in Lean.
+</p>
+<h1 id="incr-faster-re-execution-via-bolt-on-incrementalization">
+ Incr:
+Faster Re-execution via Bolt-on Incrementalization
+</h1>
+<p>
+ Maybe my favorite talk of the day. Vagos Lamprou gave a talk about a
+tool built on top of a unix primitive they have developed called Ef,
+which lets you execute a unix command in a new virtualization they call
+a “semi-isolate”. Semi-isolates isolate all the side effects of a
+command, but start from the same system state they are run in. Instead
+of being applied to your host system, these effects (such as file
+reads/writes) now pile up in a new environment, which can either be
+applied to your host system or passed to future semi-isolates to run on
+top of. This talk builds a tool called “incr” that uses semi-isolates to
+automatically incrementalize a bash script. This lets you run a script
+once, edit it, run it again, and re-use all work that still applies. It
+does this by examining the resulting environment of each command to see
+which commands depend on each other. As an example, imagine this
+script:
+</p>
+<div class="sourceCode" id="cb8">
+ <pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a aria-hidden="true" href="#cb8-1" tabindex="-1"></a><span class="fu">wget</span> <span class="op">&lt;</span>my-dataset<span class="op">&gt;</span></span>
+<span id="cb8-2"><a aria-hidden="true" href="#cb8-2" tabindex="-1"></a><span class="fu">awk</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="op">&lt;</span> dataset.csv <span class="op">&gt;</span> output.csv</span>
+<span id="cb8-3"><a aria-hidden="true" href="#cb8-3" tabindex="-1"></a><span class="ex">python</span> script.py <span class="op">&lt;</span> output.csv</span></code></pre>
+</div>
+<p>
+ You run this, and realize that
+ <code>
+  script.py
+ </code>
+ has a bug, so
+you fix it, re-run the script, and incr transparently re-uses the work
+from lines 1 and 2, saving you from re-doing that computation.
+</p>
+<h2 id="pointers-in-oxcaml">
+ Pointers in OxCaml
+</h2>
+<p>
+ Finally, there was a cool talk from Ryan Tjoa on implementing
+Interior Pointers in OxCaml (Jane Street’s performance oriented fork of
+Ocaml). Interior pointers are common in systems programming data
+structures, such as:
+</p>
+<div class="sourceCode" id="cb9">
+ <pre class="sourceCode c"><code class="sourceCode c"><span id="cb9-1"><a aria-hidden="true" href="#cb9-1" tabindex="-1"></a><span class="kw">struct</span> foo <span class="op">{</span></span>
+<span id="cb9-2"><a aria-hidden="true" href="#cb9-2" tabindex="-1"></a>  <span class="dt">int</span> len<span class="op">;</span></span>
+<span id="cb9-3"><a aria-hidden="true" href="#cb9-3" tabindex="-1"></a>  <span class="dt">int</span> <span class="op">*</span>ptr<span class="op">;</span></span>
+<span id="cb9-4"><a aria-hidden="true" href="#cb9-4" tabindex="-1"></a>  <span class="co">// Other data</span></span>
+<span id="cb9-5"><a aria-hidden="true" href="#cb9-5" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
+<p>
+ Where
+ <code>
+  ptr
+ </code>
+ might point in the middle of some other
+arbitrary data structure. This is a challenging pattern to implement in
+many languages with a garbage collector, as most garbage collectors are
+free to move heap data around to avoid memory fragmentation. This breaks
+interior pointers, as you need some way to update them, or else they
+will point to invalid data. Additionally, the garbage collector needs to
+be able to understand what objects interior pointers are referring to so
+that it can track liveness of heap objects and correctly avoid
+use-after-free issues. This is solved in OxCaml using a two-word field,
+where the first word tracks the base object, and the second word is an
+offset into the object. These are also set up using the type system so
+that they compose nicely, say you have two types like this:
+</p>
+<div class="sourceCode" id="cb10">
+ <pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb10-1"><a aria-hidden="true" href="#cb10-1" tabindex="-1"></a><span class="kw">type</span> b = {</span>
+<span id="cb10-2"><a aria-hidden="true" href="#cb10-2" tabindex="-1"></a>     length : <span class="dt">int</span>;</span>
+<span id="cb10-3"><a aria-hidden="true" href="#cb10-3" tabindex="-1"></a>     inner : <span class="dt">int</span> <span class="dt">array</span>;</span>
+<span id="cb10-4"><a aria-hidden="true" href="#cb10-4" tabindex="-1"></a>}</span>
+<span id="cb10-5"><a aria-hidden="true" href="#cb10-5" tabindex="-1"></a><span class="kw">type</span> a = {</span>
+<span id="cb10-6"><a aria-hidden="true" href="#cb10-6" tabindex="-1"></a>     data : b <span class="dt">array</span>;</span>
+<span id="cb10-7"><a aria-hidden="true" href="#cb10-7" tabindex="-1"></a>}</span></code></pre>
+</div>
+<p>
+ Now if I have a pointer to ints offset by
+ <code>
+  b
+ </code>
+ , and a
+pointer to a
+ <code>
+  b
+ </code>
+ offset by
+ <code>
+  a
+ </code>
+ , I can combine
+these to get a pointer to ints offset by
+ <code>
+  a
+ </code>
+ .
+</p>
+</article>
+        </main>
+    </body>
+</html>
